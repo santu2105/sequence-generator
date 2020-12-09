@@ -27,15 +27,15 @@ import org.slf4j.LoggerFactory;
 @RestController
 public class StepController {
 	private static final Logger logger = LoggerFactory.getLogger(StepController.class);
-	
+
 	@Autowired
 	private CompletableFutureConfig completableFutureConfig;
 
 	@PostMapping("/api/generate")
 	public ResponseEntity<TaskDto> generateSequence(@RequestBody GenerateDto generateDto) {
-		
+
 		UUID uuid = UUID.randomUUID();
-		logger.info("Generating UUI for task: "+ uuid.toString());
+		logger.info("Generating UUI for task: " + uuid.toString());
 
 		SequenceDto sequenceDtoInProgress = new SequenceDto("IN_PROGRESS", null);
 
@@ -90,7 +90,7 @@ public class StepController {
 	public ResponseEntity<TaskDto> bulkGenerateSequence(@RequestBody ArrayList<GenerateDto> generateDtoList) {
 
 		UUID uuid = UUID.randomUUID();
-		logger.info("Generating UUI for task: "+ uuid.toString());
+		logger.info("Generating UUI for task: " + uuid.toString());
 
 		SequenceDto sequenceDtoInProgress = new SequenceDto("IN_PROGRESS", null);
 
@@ -102,7 +102,7 @@ public class StepController {
 
 		try {
 			CompletableFuture.runAsync(() -> {
-			
+
 				ArrayList<SequenceDto> sequenceDtoListSuccess = new ArrayList<SequenceDto>();
 
 				try {
@@ -114,11 +114,11 @@ public class StepController {
 
 				for (GenerateDto generateDto : generateDtoList) {
 					ArrayList<Integer> sequence = new ArrayList<Integer>();
-					
+
 					for (int i = generateDto.getGoal(); i >= 0; i -= generateDto.getStep()) {
 						sequence.add(i);
 					}
-					
+
 					SequenceDto sequenceDtoSuccess = new SequenceDto("SUCCESS", sequence);
 					sequenceDtoListSuccess.add(sequenceDtoSuccess);
 				}
@@ -149,9 +149,17 @@ public class StepController {
 		ArrayList<SequenceDto> sequenceDtoList = completableFutureConfig.getSequenceMap().get(uuid);
 
 		ArrayList<String> result = new ArrayList<String>();
-		for (SequenceDto sequenceDto : sequenceDtoList) {
-			result.add(String.join(", ",
-					sequenceDto.getSeqeunce().stream().map(Object::toString).collect(Collectors.toList())));
+		if (sequenceDtoList != null) {
+			for (SequenceDto sequenceDto : sequenceDtoList) {
+				result.add(String.join(", ",
+						sequenceDto.getSeqeunce().stream().map(Object::toString).collect(Collectors.toList())));
+			}
+		} else {
+			return ResponseEntity.notFound().build();
+		}
+		if (result.isEmpty()) {
+			logger.error("The Sequence Genertion for \"" + uuid + "\" still in Progress");
+			return ResponseEntity.notFound().build();
 		}
 
 		return ResponseEntity.ok().body(result.size() > 1 ? new ResultsDto(result) : new ResultDto(result.get(0)));
@@ -163,8 +171,12 @@ public class StepController {
 		ArrayList<SequenceDto> sequenceDtoList = completableFutureConfig.getSequenceMap().get(uuid);
 
 		ArrayList<String> result = new ArrayList<String>();
-		for (SequenceDto sequenceDto : sequenceDtoList) {
-			result.add(sequenceDto.getStatus());
+		if (sequenceDtoList != null) {
+			for (SequenceDto sequenceDto : sequenceDtoList) {
+				result.add(sequenceDto.getStatus());
+			}
+		} else {
+			return ResponseEntity.notFound().build();
 		}
 
 		return ResponseEntity.ok().body(result.size() > 1 ? new ResultsDto(result) : new ResultDto(result.get(0)));

@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
 
 import com.example.demo.dto.ResultDto;
 import com.example.demo.dto.TaskDto;
@@ -31,14 +32,24 @@ public class StepControllerTests {
 	public void getInProgressOnGenerare() throws Exception {
 		GenerateDto generateDto = new GenerateDto(10, 2);
 
+		assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/api/task/uuid/status", ResultDto.class)
+				.getStatusCode().equals(HttpStatus.NOT_FOUND));
+		
+		assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/api/task/uuid", ResultDto.class)
+				.getStatusCode().equals(HttpStatus.NOT_FOUND));
+		
 		String uuid = this.restTemplate
-				.postForEntity("http://localhost:" + port + "/api/generate", generateDto, TaskDto.class).getBody().getTask();
+				.postForEntity("http://localhost:" + port + "/api/generate", generateDto, TaskDto.class).getBody()
+				.getTask();
 
 		assertThat(!uuid.isEmpty());
 
 		assertThat(this.restTemplate
 				.getForEntity("http://localhost:" + port + "/api/task/" + uuid + "/status", ResultDto.class).getBody()
 				.getResult().contains("IN_PROGRESS"));
+
+		assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/api/task/" + uuid, ResultDto.class)
+				.getStatusCode().equals(HttpStatus.NOT_FOUND));
 
 		TimeUnit.SECONDS.sleep(40);
 
@@ -56,6 +67,13 @@ public class StepControllerTests {
 		generateDtoList.add(new GenerateDto(10, 2));
 		generateDtoList.add(new GenerateDto(20, 2));
 
+		assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/api/task/uuid/status", ResultDto.class)
+				.getStatusCode().equals(HttpStatus.NOT_FOUND));
+		
+		assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/api/task/uuid", ResultDto.class)
+				.getStatusCode().equals(HttpStatus.NOT_FOUND));
+		
+		
 		String uuid = this.restTemplate
 				.postForEntity("http://localhost:" + port + "/api/bulkGenerate", generateDtoList, TaskDto.class)
 				.getBody().getTask();
@@ -65,6 +83,9 @@ public class StepControllerTests {
 		assertThat(this.restTemplate
 				.getForEntity("http://localhost:" + port + "/api/task/" + uuid + "/status", ResultDto.class).getBody()
 				.getResult().contains("IN_PROGRESS"));
+		
+		assertThat(this.restTemplate.getForEntity("http://localhost:" + port + "/api/task/" + uuid, ResultDto.class)
+				.getStatusCode().equals(HttpStatus.NOT_FOUND));
 
 		TimeUnit.SECONDS.sleep(40);
 
