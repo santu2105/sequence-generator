@@ -43,12 +43,14 @@ public class StepController {
 		sequenceDtoListInProgress.add(sequenceDtoInProgress);
 
 		completableFutureConfig.getSequenceMap().put(uuid.toString(), sequenceDtoListInProgress);
+		logger.info("Adding list of IN_PROGRESS task to completableFutureConfig");
 
 		try {
 			CompletableFuture.runAsync(() -> {
 				ArrayList<Integer> sequence = new ArrayList<Integer>();
 
 				try {
+					logger.info("Waiting for 30 seconds");
 					TimeUnit.SECONDS.sleep(30);
 				} catch (InterruptedException e) {
 					throw new IllegalStateException(e);
@@ -64,6 +66,7 @@ public class StepController {
 				sequenceDtoListSuccess.add(sequenceDtoSuccess);
 
 				completableFutureConfig.getSequenceMap().replace(uuid.toString(), sequenceDtoListSuccess);
+				logger.info("Adding list of SUCCESS task to completableFutureConfig");
 
 			});
 		} catch (Exception e) {
@@ -76,8 +79,10 @@ public class StepController {
 			sequenceDtoListFailed.add(sequenceDtoFailed);
 
 			completableFutureConfig.getSequenceMap().replace(uuid.toString(), sequenceDtoListFailed);
+			logger.info("Adding list of FAILED task to completableFutureConfig");
 		}
 
+		logger.info("Sending response");
 		return ResponseEntity.accepted().body(new TaskDto(uuid.toString()));
 	}
 
@@ -85,6 +90,7 @@ public class StepController {
 	public ResponseEntity<TaskDto> bulkGenerateSequence(@RequestBody ArrayList<GenerateDto> generateDtoList) {
 
 		UUID uuid = UUID.randomUUID();
+		logger.info("Generating UUI for task: "+ uuid.toString());
 
 		SequenceDto sequenceDtoInProgress = new SequenceDto("IN_PROGRESS", null);
 
@@ -92,6 +98,7 @@ public class StepController {
 		sequenceDtoListInProgress.add(sequenceDtoInProgress);
 
 		completableFutureConfig.getSequenceMap().put(uuid.toString(), sequenceDtoListInProgress);
+		logger.info("Adding list of IN_PROGRESS task to completableFutureConfig");
 
 		try {
 			CompletableFuture.runAsync(() -> {
@@ -99,6 +106,7 @@ public class StepController {
 				ArrayList<SequenceDto> sequenceDtoListSuccess = new ArrayList<SequenceDto>();
 
 				try {
+					logger.info("Waiting for 30 seconds");
 					TimeUnit.SECONDS.sleep(30);
 				} catch (InterruptedException e) {
 					throw new IllegalStateException(e);
@@ -110,12 +118,13 @@ public class StepController {
 					for (int i = generateDto.getGoal(); i >= 0; i -= generateDto.getStep()) {
 						sequence.add(i);
 					}
+					
 					SequenceDto sequenceDtoSuccess = new SequenceDto("SUCCESS", sequence);
 					sequenceDtoListSuccess.add(sequenceDtoSuccess);
 				}
 
 				completableFutureConfig.getSequenceMap().replace(uuid.toString(), sequenceDtoListSuccess);
-
+				logger.info("Adding list of SUCCESS task to completableFutureConfig");
 			});
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -127,8 +136,10 @@ public class StepController {
 			sequenceDtoListFailed.add(sequenceDtoFailed);
 
 			completableFutureConfig.getSequenceMap().replace(uuid.toString(), sequenceDtoListFailed);
+			logger.info("Adding list of FAILED task to completableFutureConfig");
 		}
 
+		logger.info("Sending response");
 		return ResponseEntity.accepted().body(new TaskDto(uuid.toString()));
 
 	}

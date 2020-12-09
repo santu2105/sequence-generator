@@ -28,7 +28,6 @@ public class CompletableFutureConfig {
 		sequenceMap = new HashMap<String, ArrayList<SequenceDto>>();
 	}
 
-	
 	public CompletableFutureConfig(HashMap<String, ArrayList<SequenceDto>> sequenceMap) {
 		super();
 		this.sequenceMap = sequenceMap;
