@@ -151,8 +151,10 @@ public class StepController {
 		ArrayList<String> result = new ArrayList<String>();
 		if (sequenceDtoList != null) {
 			for (SequenceDto sequenceDto : sequenceDtoList) {
-				result.add(String.join(", ",
-						sequenceDto.getSeqeunce().stream().map(Object::toString).collect(Collectors.toList())));
+				if (sequenceDto.getSeqeunce() != null) {
+					result.add(String.join(", ",
+							sequenceDto.getSeqeunce().stream().map(Object::toString).collect(Collectors.toList())));
+				}
 			}
 		} else {
 			return ResponseEntity.notFound().build();
