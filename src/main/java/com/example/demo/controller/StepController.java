@@ -21,14 +21,21 @@ import com.example.demo.dto.ResultsDto;
 import com.example.demo.dto.SequenceDto;
 import com.example.demo.dto.TaskDto;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 public class StepController {
+	private static final Logger logger = LoggerFactory.getLogger(StepController.class);
+	
 	@Autowired
 	private CompletableFutureConfig completableFutureConfig;
 
 	@PostMapping("/api/generate")
 	public ResponseEntity<TaskDto> generateSequence(@RequestBody GenerateDto generateDto) {
+		
 		UUID uuid = UUID.randomUUID();
+		logger.info("Generating UUI for task: "+ uuid.toString());
 
 		SequenceDto sequenceDtoInProgress = new SequenceDto("IN_PROGRESS", null);
 
